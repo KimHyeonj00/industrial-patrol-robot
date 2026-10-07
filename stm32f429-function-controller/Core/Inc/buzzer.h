@@ -20,12 +20,4 @@ void Buzzer_On(uint16_t duty);
  */
 void Buzzer_Off(void);
 
-/**
- * @brief "삑!" (비차단) - 주기적으로 호출하면 duration 동안만 울림
- * @param duty 0~999
- * @param duration_ms 울리는 시간
- * @param now_ms HAL_GetTick()
- */
-void Buzzer_BeepTick(uint16_t duty, uint32_t duration_ms, uint32_t now_ms);
-
 #endif

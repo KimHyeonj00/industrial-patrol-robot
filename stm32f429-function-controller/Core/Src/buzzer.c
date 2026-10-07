@@ -25,24 +25,3 @@ void Buzzer_Off(void)
 {
     __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, 0);
 }
-
-void Buzzer_BeepTick(uint16_t duty, uint32_t duration_ms, uint32_t now_ms)
-{
-    static uint8_t active = 0;
-    static uint32_t t0 = 0;
-
-    duty = clamp_u16(duty, BUZ_MAX_DUTY);
-
-    if (!active) {
-        // 한 번 호출되면 비프 시작
-        active = 1;
-        t0 = now_ms;
-        Buzzer_On(duty);
-        return;
-    }
-
-    if ((now_ms - t0) >= duration_ms) {
-        Buzzer_Off();
-        active = 0;
-    }
-}

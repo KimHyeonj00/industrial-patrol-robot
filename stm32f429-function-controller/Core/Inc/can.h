@@ -15,7 +15,7 @@
 #define CAN_ID_TX_STATUS    0x105U  // 상태 보고(조도 + RGB LED + Red LED + 부저)
 
 // ── 수신 콜백 함수 포인터 타입 ───────────────────────
-// ap.c에서 ID별로 직접 분기 처리할 수 있도록 ID와 원본 데이터를 넘겨줍니다.
+// 상위 애플리케이션에서 ID별로 처리할 수 있도록 수신 ID, 데이터, DLC를 콜백으로 전달합니다.
 typedef void (*can_rx_cb_t)(uint32_t id, const uint8_t *data, uint8_t dlc);
 
 // ── 외부 노출 API ────────────────────────────────────

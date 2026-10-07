@@ -71,7 +71,6 @@ uint16_t adcValue = 0;
 uint8_t rgb_led_state = 0;    // 0: OFF, 1: ON
 uint8_t red_led_state = 0;    // 0: OFF, 1: ON
 uint8_t buzzer_state = 0;     // 0: OFF, 1: ON
-//uint16_t buzzer_duty = 0;   // 필요하면 부저 세기까지 저장
 uint8_t manual_rgb_req = 0;  // 수동 RGB ON/OFF 요청
 /* USER CODE END PV */
 
@@ -127,7 +126,10 @@ static void update_rgb_led(void)
 
 static void app_can_rx_cb(uint32_t id, const uint8_t *data, uint8_t dlc)
 {
-    (void)dlc;
+    if (data == NULL || dlc < 1)
+    {
+        return;
+    }
 
     switch (id)
     {
@@ -213,11 +215,7 @@ int main(void)
   MX_TIM3_Init();
   MX_CAN1_Init();
   /* USER CODE BEGIN 2 */
-  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1); // 부저
-  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1); // RGB - Red
-  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2); // RGB - Green
-  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3); // RGB - Blue
-  LED_Init();          // (led.c에 LED_Init이 있을 때)
+  LED_Init();          
   WarningLed_Init();
   Buzzer_Init();
   can_comm_init(&hcan1, app_can_rx_cb); // CAN 시작 + RX 알림 활성화 + 필터 설정
@@ -227,7 +225,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-  //  // ADC 읽기
+    // 조도 센서 ADC 값 읽기
     HAL_ADC_Start(&hadc1);
     if (HAL_ADC_PollForConversion(&hadc1, 10) == HAL_OK) {
         adcValue = (uint16_t)HAL_ADC_GetValue(&hadc1); // 0~4095
@@ -772,8 +770,7 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
-{
-  HAL_GPIO_TogglePin(GPIOB, LD1_Pin);  
+{  
   can_comm_rx_handler(hcan);
 }
 /* USER CODE END 4 */

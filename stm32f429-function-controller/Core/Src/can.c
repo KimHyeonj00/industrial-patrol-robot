@@ -1,13 +1,10 @@
 #include "can.h"
 #include <stddef.h>
-#include <stdio.h>
 
 /* 내부 상태 */
 static CAN_HandleTypeDef *s_hcan  = NULL;
 static can_rx_cb_t        s_rx_cb = NULL;
 
-/* ⚠️ 실제 사용하는 UART로 맞춰야 함 */
-extern UART_HandleTypeDef huart3;
 
 /* ================= CAN Filter 설정 ================= */
 static void can_filter_init(CAN_HandleTypeDef *hcan)
@@ -37,9 +34,17 @@ void can_comm_init(CAN_HandleTypeDef *hcan, can_rx_cb_t cb)
 
     can_filter_init(hcan);
 
-    HAL_CAN_Start(hcan);
-    HAL_CAN_ActivateNotification(hcan,
-        CAN_IT_RX_FIFO0_MSG_PENDING);
+    if (HAL_CAN_Start(hcan) != HAL_OK)
+    {
+        Error_Handler();
+    }
+
+    if (HAL_CAN_ActivateNotification(
+            hcan,
+            CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK)
+    {
+        Error_Handler();
+    }
 }
 
 /* ================= CAN TX (센서 값 전송) ================= */
@@ -78,9 +83,10 @@ void can_comm_tx_status(uint16_t light_val,
 /* ================= CAN RX 처리 ================= */
 void can_comm_rx_handler(CAN_HandleTypeDef *hcan)
 {
-
     if (s_hcan == NULL || hcan->Instance != s_hcan->Instance)
+    {
         return;
+    }
 
     CAN_RxHeaderTypeDef hdr;
     uint8_t data[8] = {0};
